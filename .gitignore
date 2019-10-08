@@ -17,3 +17,9 @@
 
 #Jetbrain's .idea
 /.idea/
+dbFile/*
+!dbFile/README.md
+
+
+# Test files
+test.go

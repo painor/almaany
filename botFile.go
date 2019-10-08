@@ -39,6 +39,20 @@ func main() {
 		} else {
 			_, _ = bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "تم العثور على "+strconv.Itoa(len(results))))
 		}
+		var divided [][]almaany.Manaa
+
+		chunkSize := 4
+
+		for i := 0; i < len(results); i += chunkSize {
+			end := i + chunkSize
+
+			if end > len(results) {
+				end = len(results)
+			}
+
+			divided = append(divided, results[i:end])
+		}
+
 		for _, element := range results {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, element.Word)
 			_, _ = bot.Send(msg)
