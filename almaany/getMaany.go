@@ -1,4 +1,4 @@
-package getMaany
+package almaany
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 )
 
 type Manaa struct {
-	word         string
-	wordType     string
-	explanations []string
+	Word         string
+	WordType     string
+	Explanations []string
 }
 
 const EndPoint = "https://www.almaany.com/ar/dict/ar-ar/%s/"
@@ -20,18 +20,19 @@ func ScrapePages(word string) []Manaa {
 	// Request the HTML page.
 	res, err := http.Get(fmt.Sprintf(EndPoint, word))
 	if err != nil {
-		log.Fatal(err)
+		return make([]Manaa, 0)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+		return make([]Manaa, 0)
+
 	}
 
 	// Load the HTML document
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return make([]Manaa, 0)
 	}
 
 	// TODO support both meaning results
