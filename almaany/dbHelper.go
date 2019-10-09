@@ -49,7 +49,6 @@ func SaveWords(searched string, words []Manaa) bool {
 	stmt, err := db.Prepare("INSERT INTO MAANI(word,wordType,explanations) values(?,?,?)")
 	if err != nil {
 		log.Printf("%q: \n", err)
-		return false
 	}
 
 	var searchKeys []string
@@ -61,21 +60,18 @@ func SaveWords(searched string, words []Manaa) bool {
 		_, err = stmt.Exec(word, wordType, explanations)
 		if err != nil {
 			log.Printf("%q: \n", err)
-			return false
 		}
 		searchKeys = append(searchKeys, word)
 	}
 	stmt, err = db.Prepare("INSERT INTO searchKeys(word,terms) values(?,?)")
 	if err != nil {
 		log.Printf("%q: \n", err)
-		return false
 	}
 	encodedJson, _ := json.Marshal(searchKeys)
 
 	_, err = stmt.Exec(removeTashkeel(searched), string(encodedJson))
 	if err != nil {
 		log.Printf("%q: \n", err)
-		return false
 	}
 
 	return true
