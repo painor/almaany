@@ -17,6 +17,8 @@ type Manaa struct {
 const EndPoint = "https://www.almaany.com/ar/dict/ar-ar/%s/"
 
 func ScrapePages(word string) []Manaa {
+	// Remove tashkeel first
+	word = removeTashkeel(word)
 	// Request the HTML page.
 	res, err := http.Get(fmt.Sprintf(EndPoint, word))
 	if err != nil {
@@ -65,6 +67,11 @@ func ScrapePages(word string) []Manaa {
 			// basic assign
 			explanationsArray[i] = strings.TrimSpace(htmlRes)
 		})
+		wordType = strings.ReplaceAll(wordType, "(", "")
+		wordType = strings.ReplaceAll(wordType, ")", "")
+		wordType = strings.ReplaceAll(wordType, ":", "")
+		wordType = strings.TrimSpace(wordType)
+
 		allMaany[i] = Manaa{name, wordType, explanationsArray}
 		for true {
 
