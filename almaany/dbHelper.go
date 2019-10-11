@@ -3,6 +3,7 @@ package almaany
 import (
 	"database/sql"
 	"encoding/json"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"strings"
@@ -34,13 +35,40 @@ func InitDatabase() bool {
 	}
 
 	sqlStmt := `CREATE TABLE IF NOT EXISTS searchKeys ( word VARCHAR(40) PRIMARY KEY, terms TEXT);
-CREATE TABLE IF NOT EXISTS MAANI (word VARCHAR(40) primary key, wordType VARCHAR(40),explanations TEXT);`
+CREATE TABLE IF NOT EXISTS MAANI (word VARCHAR(40) primary key, wordType VARCHAR(40),explanations TEXT);
+CREATE TABLE IF NOT EXISTS USERS(id integer primary key ,firstName VARCHAR(255),lastName VARCHAR(255),username VARCHAR(255))
+`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		log.Printf("%q: %s\n", err, sqlStmt)
 		return false
 	}
 	return true
+}
+
+//Adds a user
+func AddUser(user *tgbotapi.User) {
+
+	id := user.ID
+	firstName := user.FirstName
+	if len(firstName) > 200 {
+		firstName = firstName[0:200]
+	}
+	lastName := user.LastName
+	if len(lastName) > 200 {
+		lastName = lastName[0:200]
+	}
+	username := user.UserName
+	stmt, err := db.Prepare("INSERT INTO USERS(id,firstName,lastName,username) values(?,?,?,?)")
+	if err != nil {
+		log.Printf("%q: \n", err)
+	}
+
+	_, err = stmt.Exec(id, firstName, lastName, username)
+	if err != nil {
+		log.Printf("%q: \n", err)
+	}
+
 }
 
 //Save words to the database

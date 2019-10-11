@@ -17,9 +17,10 @@
 
 #Jetbrain's .idea
 /.idea/
+#Personal Files
 dbFile/*
 !dbFile/README.md
-
+configs.json
 
 # Test files
-test.go
+testgo.go

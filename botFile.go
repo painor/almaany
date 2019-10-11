@@ -2,20 +2,23 @@ package main
 
 import (
 	"./almaany"
+	"encoding/json"
+	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	strip "github.com/grokify/html-strip-tags-go"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"strings"
 )
 
+type Config struct {
+	BotUsername string
+	Dev         string
+}
+
 func handleTextUpdates(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
-	if update.Message.Text == "/start" {
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "الرجاء ادخال كلمة واحدة. شكرا")
-		_, _ = bot.Send(msg)
-		return
-	}
 	firstWord := strings.Fields(update.Message.Text)[0]
 	dbResults := almaany.GetSearchedWord(firstWord)
 	if len(dbResults) == 0 {
@@ -63,8 +66,40 @@ func handleTextUpdates(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 }
 
+const start = `حياكم الله في قاموس المعاني
+
+💠 ابحث عن أي كلمة عربية في التلغرام لتعرف عن معناها و تفاسيرها.
+
+للمساعدة وطريقة الاستخدام اضغط /help`
+
+const help = `📚 المعاني - عربي عربي
+
+💠 يمكنك البحث بطريقتين:
+
+🔍 داخل البوت:
+اكتب الكلمة في المحادثة الخاصة  مع البوت وسيعطيك البوت أقرب النتائج لكلمتك، تستطيع الضغط على أي منها لمعرفة تفاسيرها.
+
+🔍 من خارج البوت في أي محادثة:
+في أي محادثة يمكنك كتابة اسم البوت في صندوق الكتابة مبتوعا بكلمة البحث مع مسافة فاصلة بينهما هكذا:
+
+@%s كلمة
+
+سيعطيك البوت الكثير من النتائج وتستطيع اختيار احداها لإرسالها للشخص الذي تتحدث معه.
+
+للتواصل مع المطور في حال حدوث خلل مع البوت
+@%s`
+
 func main() {
 	almaany.InitDatabase()
+	var config Config
+	data, err := ioutil.ReadFile("./configs.json")
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	_ = json.Unmarshal(data, &config)
+	help := fmt.Sprintf(help, config.BotUsername, config.Dev)
+
 	bot, err := tgbotapi.NewBotAPI("986995701:AAHIyuq1Nj8uc92rWYrsDhgM20zfIu6ZZRk")
 	if err != nil {
 		log.Panic(err)
@@ -82,7 +117,17 @@ func main() {
 
 		if update.Message != nil { // handles text updates
 			if update.Message.Chat.ID > 0 {
-				handleTextUpdates(bot, update)
+				if update.Message.Text == "/start" {
+					msg := tgbotapi.NewMessage(int64(update.Message.From.ID), start)
+					_, _ = bot.Send(msg)
+					almaany.AddUser(update.Message.From)
+				} else if update.Message.Text == "/help" {
+					msg := tgbotapi.NewMessage(int64(update.Message.From.ID), help)
+					_, _ = bot.Send(msg)
+				} else {
+					handleTextUpdates(bot, update)
+				}
+
 			}
 		} else if update.CallbackQuery != nil { // handles inline callbacks
 			handleCallbackQueryUpdates(bot, update)
