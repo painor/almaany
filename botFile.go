@@ -95,7 +95,7 @@ func main() {
 
 func handleInlineQueryUpdates(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	if len(update.InlineQuery.Query) == 0 {
-		inline := tgbotapi.NewInlineQueryResultArticle(update.InlineQuery.ID, "إكتب كلمة ليتم البحث عن معناها",
+		inline := tgbotapi.NewInlineQueryResultArticleHTML(update.InlineQuery.ID, "إكتب كلمة ليتم البحث عن معناها",
 			"الرجاء كتابة كلمة ليتم البحث عن معناها")
 		inlineConf := tgbotapi.InlineConfig{
 			InlineQueryID: update.InlineQuery.ID,
@@ -154,9 +154,9 @@ func handleInlineQueryUpdates(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 	var results []interface{}
 
-	for _, result := range dbResults {
+	for index, result := range dbResults {
 		explanation := almaany.GetExplanation(result)
-		article := tgbotapi.NewInlineQueryResultArticleHTML(result, result, almaany.FormatMaany(explanation))
+		article := tgbotapi.NewInlineQueryResultArticleHTML(strconv.Itoa(index), result, almaany.FormatMaany(explanation))
 		article.Description = strip.StripTags(explanation.Explanations[0])
 		results = append(results, article)
 	}
